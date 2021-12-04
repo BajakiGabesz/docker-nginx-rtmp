@@ -129,7 +129,6 @@ LABEL MAINTAINER Alfred Gutierrez <alf.g.jr@gmail.com>
 # Set default ports.
 ENV HTTP_PORT 80
 ENV HTTPS_PORT 443
-ENV RTMP_PORT 1935
 
 RUN apk add --update \
   ca-certificates \
@@ -159,10 +158,12 @@ ENV PATH "${PATH}:/usr/local/nginx/sbin"
 ADD nginx.conf /etc/nginx/nginx.conf.template
 RUN mkdir -p /opt/data && mkdir /www
 ADD static /www/static
+RUN mkdir /www/static/hls & /www/static/live
 
-EXPOSE 1935
 EXPOSE 80
 
 CMD envsubst "$(env | sed -e 's/=.*//' -e 's/^/\$/g')" < \
   /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && \
   nginx
+
+CMD ffmpeg -y -i https://stream.danubiusradio.hu/danubius_HiFi -map a:0 -c:a:0 alac -f hls -hls_time 10 -hls_list_size 3 -hls_flags delete_segments -hls_segment_type fmp4 -hls_segment_filename /www/static/hls/stream%03d.m4s -hls_fmp4_init_resend 1 -hls_fmp4_init_filename "init.mp4" -ignore_io_errors 1 -var_stream_map "a:0" -master_pl_name master.m3u8 /www/static/hls/stream.m3u8
