@@ -158,7 +158,7 @@ ENV PATH "${PATH}:/usr/local/nginx/sbin"
 ADD nginx.conf /etc/nginx/nginx.conf.template
 RUN mkdir -p /opt/data && mkdir /www
 ADD static /www/static
-RUN mkdir /www/static/hls & /www/static/live
+RUN mkdir /www/static/hls & mkdir /www/static/live
 
 EXPOSE 80
 
